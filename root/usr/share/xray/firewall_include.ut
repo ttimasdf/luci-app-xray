@@ -1,6 +1,28 @@
 #!/usr/bin/utpl
 {%
     const uci = require("uci");
+    const fs = require("fs");
+
+    function iterate_file(filename, cb) {
+        let fd = fs.open(filename, "r");
+        if (!fd) {
+            warn(`Unable to open '${filename}': ${fs.error()}\n`);
+            return;
+        }
+
+        let line = null, count = 0;
+        while (!!(line = trim(fd.read("line")))) {
+            if (ord(line) == 35)  // skip lines which start with '#'
+                continue;
+
+            cb(line);
+
+            count++;
+        }
+        fd.close();
+        return count;
+    }
+
     const cursor = uci.cursor();
     cursor.load("xray");
     const config = cursor.get_all("xray");
@@ -9,12 +31,12 @@
     const tp_spec_src_bp = uniq(map(filter(keys(config), k => config[k][".type"] == "lan_hosts" && config[k].bypassed == "1"), k => config[k].macaddr) || []);
     const uids_direct = uniq(general.uids_direct || []);
     const gids_direct = uniq(general.gids_direct || []);
-    let wan_bp_ips_no_dns = general.wan_bp_ips || [];
-    let wan_fw_ips_no_dns = general.wan_fw_ips || [];
-    push(wan_bp_ips_no_dns, split(general.fast_dns, ":")[0]);
-    push(wan_fw_ips_no_dns, split(general.secure_dns, ":")[0]);
-    const wan_bp_ips = uniq(wan_bp_ips_no_dns);
-    const wan_fw_ips = uniq(wan_fw_ips_no_dns);
+    const wan_bp_ips = general.wan_bp_ips || [];
+    const wan_fw_ips = general.wan_fw_ips || [];
+    iterate_file(general.wan_bp_list || "/dev/null", line => push(wan_bp_ips, line));
+    iterate_file(general.wan_fw_list || "/dev/null", line => push(wan_fw_ips, line));
+    push(wan_bp_ips, split(general.fast_dns, ":")[0]);
+    push(wan_fw_ips, split(general.secure_dns, ":")[0]);
 %}
     set tp_spec_src_bp {
         type ether_addr
@@ -61,6 +83,7 @@
         size 65536
         flags interval
         elements = { {{ join(", ", wan_bp_ips)}} }
+        auto-merge
     }
 
     set tp_spec_dst_fw {
@@ -68,6 +91,7 @@
         size 65536
         flags interval
         elements = { {{ join(", ", wan_fw_ips)}} }
+        auto-merge
     }
 
     chain xray_rules {
