@@ -1,0 +1,33 @@
+name: Build Packages
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.version }} for ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86-64, arm_cortex-a15_neon-vfpv4]
+        version: [22.03.2, 21.02.5]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build ipk
+        uses: ttimasdf/gh-action-openwrt-build-package@master
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.version }}
+
+      - name: Upload ipk packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.arch }}-${{ matrix.version }}-package
+          # path: bin/packages/${{ matrix.arch }}/action/*.ipk
+          path: bin/packages/*/action/*.ipk
