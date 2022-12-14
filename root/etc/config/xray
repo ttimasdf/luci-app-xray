@@ -15,7 +15,7 @@ config general
 	list blocked_domain_rules 'geosite:category-ads'
 	option transparent_proxy_enable '1'
 	option wan_bp_list '/dev/null'
-	option lan_target 'TP_SPEC_WAN_AC'
+	option wan_fw_list '/dev/null'
 	option lan_ifaces 'br-lan'
 	list wan_bp_ips '114.114.114.114'
 	option xray_api '1'
