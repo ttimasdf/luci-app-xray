@@ -1,12 +1,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-xray
-PKG_VERSION:=1.23.2
+PKG_VERSION:=1.24.0-rabit.1
 PKG_RELEASE:=1
 
 PKG_LICENSE:=MPLv2
 PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINER:=yichya <mail@yichya.dev>
+PKG_MAINTAINER:=ttimasdf <opensource@rabit.pw>
 PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
