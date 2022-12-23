@@ -28,29 +28,17 @@ start_xray() {
     procd_append_param command /var/etc/xray
 
     local rlimit_nofile
-    if [ -s /usr/share/xray/rlimit_nofile ] ; then
-        rlimit_nofile="nofile=""$(cat /usr/share/xray/rlimit_nofile)"
-    fi
-
     local rlimit_data
-    if [ -s /usr/share/xray/rlimit_data ] ; then
-        rlimit_data="data=""$(cat /usr/share/xray/rlimit_data)"
-    fi
+    rlimit_nofile="$(uci_get_by_type general rlimit_nofile)"
+    rlimit_data="$(uci_get_by_type general rlimit_data)"
 
-    # this param passing method is just so fucking weird
-    if [ -z "${rlimit_nofile}" ] ; then
-        if [ ! -z "${rlimit_data}" ]; then
-            log_procd_set_param limits "${rlimit_data}"
-            procd_set_param limits "${rlimit_data}"
-        fi
-    else
-        if [ -z "${rlimit_data}" ]; then
-            log_procd_set_param limits "${rlimit_nofile}"
-            procd_set_param limits "${rlimit_nofile}"
-        else
-            log_procd_set_param limits "${rlimit_data}" "${rlimit_nofile}"
-            procd_set_param limits "${rlimit_data}" "${rlimit_nofile}"
-        fi
+    if [ ! -z "${rlimit_nofile}" ] ; then
+        log "set limit nofile=${rlimit_nofile}"
+        procd_set_param limits "nofile=${rlimit_nofile}"
+    fi
+    if [ ! -z "${rlimit_data}" ] ; then
+        log "set limit data=${rlimit_data}"
+        procd_set_param limits "data=${rlimit_data}"
     fi
 
     procd_set_param env XRAY_LOCATION_ASSET=/usr/share/xray
@@ -63,15 +51,8 @@ start_xray() {
 
 gen_config_file() {
     rm -f /var/etc/xray/*
-    if [ -s /usr/share/xray/infinite_retry ] ; then
-        while [ ! -s /var/etc/xray/config.json ] ; do
-            log "(Re)generating Xray configuration files..."
-            impl_gen_config_file
-        done
-    else
-        log "Generating Xray configuration files..."
-        impl_gen_config_file
-    fi
+    log "Generating Xray configuration files..."
+    impl_gen_config_file
     local custom_config=$(uci_get_by_type general custom_config)
     [ ! "${#custom_config}" == "0" ] && echo ${custom_config} > /var/etc/xray/config_custom.json
 }

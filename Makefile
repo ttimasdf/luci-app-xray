@@ -31,25 +31,6 @@ config PACKAGE_XRAY_INCLUDE_CLOUDFLARE_ORIGIN_ROOT_CA
 	bool "Include Cloudflare Origin Root CA"
 	default n
 
-config PACKAGE_XRAY_INFINITE_RETRY_ON_STARTUP
-	bool "Retry infinitely on Xray startup (may solve some startup problems)"
-	default n
-
-config PACKAGE_XRAY_RLIMIT_NOFILE_LARGE
-	bool "Increase Max Open Files Limit (recommended)"
-	default y
-
-choice
-	prompt "Limit memory use by setting rlimit_data (experimental)"
-	default PACKAGE_XRAY_RLIMIT_DATA_UNLIMITED
-	config PACKAGE_XRAY_RLIMIT_DATA_UNLIMITED
-		bool "Not limited"
-	config PACKAGE_XRAY_RLIMIT_DATA_SMALL
-		bool "Small limit (about 50MB)"
-	config PACKAGE_XRAY_RLIMIT_DATA_LARGE
-		bool "Large limit (about 321MB)"
-endchoice
-
 endmenu
 endef
 
@@ -84,18 +65,6 @@ endif
 	$(INSTALL_BIN) $(CURDIR)/root/usr/libexec/rpcd/xray $(1)/usr/libexec/rpcd/xray
 	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d/
 	$(INSTALL_DATA) $(CURDIR)/root/usr/share/rpcd/acl.d/luci-app-xray.json $(1)/usr/share/rpcd/acl.d/luci-app-xray.json
-ifdef CONFIG_PACKAGE_XRAY_INFINITE_RETRY_ON_STARTUP
-	$(INSTALL_DATA) ./root/usr/share/xray/infinite_retry $(1)/usr/share/xray/infinite_retry
-endif
-ifdef CONFIG_PACKAGE_XRAY_RLIMIT_NOFILE_LARGE
-	$(INSTALL_DATA) ./root/usr/share/xray/rlimit_nofile_large $(1)/usr/share/xray/rlimit_nofile
-endif
-ifdef CONFIG_PACKAGE_XRAY_RLIMIT_DATA_SMALL
-	$(INSTALL_DATA) ./root/usr/share/xray/rlimit_data_small $(1)/usr/share/xray/rlimit_data
-endif
-ifdef CONFIG_PACKAGE_XRAY_RLIMIT_DATA_LARGE
-	$(INSTALL_DATA) ./root/usr/share/xray/rlimit_data_large $(1)/usr/share/xray/rlimit_data
-endif
 
 	$(INSTALL_DIR) $(1)/usr/share/xray/
 	$(INSTALL_DIR) $(1)/lib/functions/

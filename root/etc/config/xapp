@@ -30,6 +30,8 @@ config general
 	option uplink_only '2'
 	option downlink_only '5'
 	option buffer_size '512'
+	option rlimit_nofile ''
+	option rlimit_data ''
 
 config servers
 	option security 'auto'

@@ -782,6 +782,31 @@ return view.extend({
         o.placeholder = 512
         o.default = 512
 
+        function rlimit_validate(section_id, value) {
+            let rlimit_regex = new RegExp("^[0-9]+ [0-9]+$","g");
+            if (value == "" || rlimit_regex.test(value)) {
+                return true
+            } else {
+                return "rlimit format: [soft] [hard]"
+            }
+        }
+        o = s.taboption('extra_options', form.Value, 'rlimit_nofile', _('Max Open Files'), _('Set xray process resource limit <code>RLIMIT_NOFILE</code>: max number of open file descriptors.'))
+        o.value("", "[unset]")
+        o.value("1024 4096", "1024 4096 (system default)")
+        o.value("8192 16384")
+        o.value("102400 204800")
+        o.default = ""
+        o.validate = rlimit_validate
+
+        o = s.taboption('extra_options', form.Value, 'rlimit_data', _('Max Allocated Memory'), _('Set xray process resource limit <code>RLIMIT_DATA</code>: max memory usage.'))
+        o.value("", "[unset]")
+        o.value("52428800 52428800", "50 MiB")
+        o.value("104857600 104857600", "100 MiB")
+        o.value("209715200 209715200", "200 MiB")
+        o.value("419430400 419430400", "400 MiB")
+        o.default = ""
+        o.validate = rlimit_validate
+
         o = s.taboption('extra_options', form.SectionValue, "xray_bridge", form.TableSection, 'bridge', _('Bridge'), _('Reverse proxy tool. Currently only client role (bridge) is supported. See <a href="https://xtls.github.io/config/reverse.html#bridgeobject">here</a> for help.'))
 
         ss = o.subsection;
