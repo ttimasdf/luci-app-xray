@@ -3,9 +3,9 @@
 START=90
 STOP=15
 USE_PROCD=1
-NAME=xray
+NAME=xapp
 
-source /usr/share/xray/init.firewall
+. /lib/functions/xray.sh
 
 uci_get_by_type() {
     local ret=$(uci get ${NAME}.@$1[0].$2 2> /dev/null)

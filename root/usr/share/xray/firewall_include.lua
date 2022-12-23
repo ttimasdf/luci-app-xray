@@ -58,8 +58,8 @@ local rules = [[
 COMMIT
 EOF]]
 
-local proxy_section = ucursor:get_first("xray", "general")
-local proxy = ucursor:get_all("xray", proxy_section)
+local proxy_section = ucursor:get_first("xapp", "general")
+local proxy = ucursor:get_all("xapp", proxy_section)
 
 print(flush)
 if proxy.transparent_proxy_enable ~= "1" then

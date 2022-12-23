@@ -158,7 +158,7 @@ function check_resource_files(load_result) {
 return view.extend({
     load: function () {
         return Promise.all([
-            uci.load("xray"),
+            uci.load("xapp"),
             fs.list("/usr/share/xray"),
             network.getHostHints()
         ])
@@ -177,7 +177,7 @@ return view.extend({
             }
         }
 
-        const m = new form.Map('xray', _('Xray'), status_text + " " + asset_file_status);
+        const m = new form.Map('xapp', _('Xray'), status_text + " " + asset_file_status);
 
         var s, o, ss;
 

@@ -10,7 +10,7 @@
                 "luci-app-xray"
             ],
             "uci": {
-                "xray": true
+                "xapp": true
             }
         }
     }

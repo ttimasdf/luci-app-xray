@@ -3,12 +3,12 @@
         "description": "Grant access to xray configurations",
         "read": {
             "uci": [
-                "xray"
+                "xapp"
             ]
         },
         "write": {
             "uci": [
-                "xray"
+                "xapp"
             ]
         }
     }

@@ -2,8 +2,8 @@
 const uci = require("uci");
 const fs = require("fs");
 const cursor = uci.cursor();
-cursor.load("xray");
-const config = cursor.get_all("xray");
+cursor.load("xapp");
+const config = cursor.get_all("xapp");
 const share_dir = fs.lsdir("/usr/share/xray");
 
 const proxy = config[filter(keys(config), k => config[k][".type"] == "general")[0]];
