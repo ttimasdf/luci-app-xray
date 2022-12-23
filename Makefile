@@ -69,17 +69,21 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/luci-uploads/xray/
 
 ifdef CONFIG_PACKAGE_XRAY_INCLUDE_CLOUDFLARE_ORIGIN_ROOT_CA
-	$(INSTALL_DATA) ./root/etc/ssl/certs/origin_ca_ecc_root.pem $(1)/etc/ssl/certs/origin_ca_ecc_root.pem
+	$(INSTALL_DIR) $(1)/etc/ssl/certs
+	$(INSTALL_DATA) $(CURDIR)/root/etc/ssl/certs/origin_ca_ecc_root.pem $(1)/etc/ssl/certs/origin_ca_ecc_root.pem
 endif
 	$(INSTALL_DIR) $(1)/www/luci-static/resources/view
 	$(INSTALL_DATA) ./root/www/luci-static/resources/view/xray.js $(1)/www/luci-static/resources/view/xray.js
-	$(INSTALL_DIR) $(1)/usr/share/luci/menu.d
-	$(INSTALL_DATA) ./root/usr/share/luci/menu.d/luci-app-xray.json $(1)/usr/share/luci/menu.d/luci-app-xray.json
-	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d
-	$(INSTALL_DATA) ./root/usr/share/rpcd/acl.d/luci-app-xray.json $(1)/usr/share/rpcd/acl.d/luci-app-xray.json
-	$(INSTALL_DIR) $(1)/usr/share/xray
-	$(LN) /var/run/xray.pid $(1)/usr/share/xray/xray.pid
-	$(LN) /usr/bin/xray $(1)/usr/share/xray/xray
+
+	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/
+	$(INSTALL_DATA) $(CURDIR)/root/www/luci-static/resources/view/xray.js $(1)/www/luci-static/resources/view/xray.js
+	$(INSTALL_DIR) $(1)/usr/share/luci/menu.d/
+	$(INSTALL_DATA) $(CURDIR)/root/usr/share/luci/menu.d/luci-app-xray.json $(1)/usr/share/luci/menu.d/luci-app-xray.json
+
+	$(INSTALL_DIR) $(1)/usr/libexec/rpcd/
+	$(INSTALL_BIN) $(CURDIR)/root/usr/libexec/rpcd/xray $(1)/usr/libexec/rpcd/xray
+	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d/
+	$(INSTALL_DATA) $(CURDIR)/root/usr/share/rpcd/acl.d/luci-app-xray.json $(1)/usr/share/rpcd/acl.d/luci-app-xray.json
 ifdef CONFIG_PACKAGE_XRAY_INFINITE_RETRY_ON_STARTUP
 	$(INSTALL_DATA) ./root/usr/share/xray/infinite_retry $(1)/usr/share/xray/infinite_retry
 endif
@@ -92,6 +96,10 @@ endif
 ifdef CONFIG_PACKAGE_XRAY_RLIMIT_DATA_LARGE
 	$(INSTALL_DATA) ./root/usr/share/xray/rlimit_data_large $(1)/usr/share/xray/rlimit_data
 endif
+
+	$(INSTALL_DIR) $(1)/usr/share/xray/
+	$(INSTALL_DIR) $(1)/lib/functions/
+
 ifdef CONFIG_PACKAGE_firewall
 	$(INSTALL_BIN) $(CURDIR)/root/usr/share/xray/gen_ipset_rules.lua $(1)/usr/share/xray/gen_ipset_rules.lua
 	$(INSTALL_BIN) $(CURDIR)/root/usr/share/xray/gen_ipset_rules_extra_normal.lua $(1)/usr/share/xray/gen_ipset_rules_extra.lua
