@@ -15,11 +15,11 @@ uci_get_by_type() {
 log_procd_set_param() {
     local type="$1"
     shift
-    logger -st xray[$$] -p4 "Using procd_set_param $type" "$@"
+    log "Using procd_set_param $type" "$@"
 }
 
 start_xray() {
-    logger -st xray[$$] -p4 "Starting Xray from $1"
+    log "Starting Xray from $1"
     procd_open_instance
     procd_set_param respawn 1 1 0
     procd_set_param command $1
@@ -65,11 +65,11 @@ gen_config_file() {
     rm -f /var/etc/xray/*
     if [ -s /usr/share/xray/infinite_retry ] ; then
         while [ ! -s /var/etc/xray/config.json ] ; do
-            logger -st xray[$$] -p4 "(Re)generating Xray configuration files..."
+            log "(Re)generating Xray configuration files..."
             impl_gen_config_file
         done
     else
-        logger -st xray[$$] -p4 "Generating Xray configuration files..."
+        log "Generating Xray configuration files..."
         impl_gen_config_file
     fi
     local custom_config=$(uci_get_by_type general custom_config)
@@ -88,7 +88,7 @@ setup_dnsmasq() {
         echo "server=127.0.0.1#${cur_port}" >> /tmp/dnsmasq.d/xray.conf
     done
 
-    logger -st xray[$$] -p4 $(cat /tmp/dnsmasq.d/xray.conf)
+    log $(cat /tmp/dnsmasq.d/xray.conf)
     /etc/init.d/dnsmasq restart > /dev/null 2>&1
 }
 
@@ -99,13 +99,13 @@ flush_dnsmasq() {
 
 create_when_enable() {
     [ "$(uci_get_by_type general transparent_proxy_enable)" == "1" ] || return 0
-    logger -st xray[$$] -p4 "Setting dnsmasq and firewall for transparent proxy..."
+    log "Setting dnsmasq and firewall for transparent proxy..."
     setup_dnsmasq
     setup_firewall
 }
 
 flush_when_disable() {
-    logger -st xray[$$] -p4 "Resetting dnsmasq and firewall configurations..."
+    log "Resetting dnsmasq and firewall configurations..."
     flush_dnsmasq
     flush_firewall
 }

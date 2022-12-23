@@ -1,24 +1,24 @@
 FIREWALL_INCLUDE="/usr/share/xray/firewall_include.lua"
 
 setup_firewall() {
-    logger -st xray[$$] -p4 "Setting ipset rules..."
+    log "Setting ipset rules..."
     lua /usr/share/xray/gen_ipset_rules.lua | ipset -! restore
 
-    logger -st xray[$$] -p4 "Generating firewall rules..."
+    log "Generating firewall rules..."
     /usr/bin/lua ${FIREWALL_INCLUDE} enable > $(uci get firewall.xray.path)
 
-    logger -st xray[$$] -p4 "Triggering firewall restart..."
-    /etc/init.d/firewall restart > /dev/null 2>&1
+    log "Triggering firewall restart..."
+    /etc/init.d/firewall reload
 }
 
 flush_firewall() {
-    logger -st xray[$$] -p4 "Flushing firewall rules..."
+    log "Flushing firewall rules..."
     /usr/bin/lua ${FIREWALL_INCLUDE} flush > $(uci get firewall.xray.path)
 
-    logger -st xray[$$] -p4 "Triggering firewall restart..."
-    /etc/init.d/firewall restart > /dev/null 2>&1
+    log "Triggering firewall restart..."
+    /etc/init.d/firewall reload
 
-    logger -st xray[$$] -p4 "Flushing ipset rules..."
+    log "Flushing ipset rules..."
     for setname in $(ipset -n list | grep "tp_spec"); do
         ipset -! destroy $setname
     done
