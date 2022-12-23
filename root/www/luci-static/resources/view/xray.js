@@ -207,6 +207,8 @@ return view.extend({
             o.value(v[".name"], v.alias || v.server + ":" + v.server_port)
         }
 
+        o = s.taboption('general', form.Flag, 'dnsmasq_takeover_enable', _('Enable dnsmasq Takeover'), _('Enable this option force using xray dns inbound port as dnsmasq\'s upstream server.'))
+
         o = s.taboption('general', form.Flag, 'transparent_proxy_enable', _('Enable Transparent Proxy'), _('This enables DNS query forwarding and TProxy for both TCP and UDP connections.'))
 
         o = s.taboption('general', form.Flag, 'tproxy_sniffing', _('Enable Sniffing'), _('If sniffing is enabled, requests will be routed according to domain settings in "DNS Settings" tab.'))

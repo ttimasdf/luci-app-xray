@@ -93,20 +93,20 @@ setup_dnsmasq() {
 }
 
 flush_dnsmasq() {
-    rm /tmp/dnsmasq.d/xray.conf
+    [ -f "/tmp/dnsmasq.d/xray.conf" ] && rm /tmp/dnsmasq.d/xray.conf
     /etc/init.d/dnsmasq restart > /dev/null 2>&1
 }
 
 create_when_enable() {
     [ "$(uci_get_by_type general transparent_proxy_enable)" == "1" ] || return 0
     log "Setting dnsmasq and firewall for transparent proxy..."
-    setup_dnsmasq
+    [ "$(uci_get_by_type general dnsmasq_takeover_enable)" == "1" ] && setup_dnsmasq
     setup_firewall
 }
 
 flush_when_disable() {
     log "Resetting dnsmasq and firewall configurations..."
-    flush_dnsmasq
+    [ "$(uci_get_by_type general dnsmasq_takeover_enable)" == "1" ] && flush_dnsmasq
     flush_firewall
 }
 
