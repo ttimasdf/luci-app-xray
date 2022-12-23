@@ -71,8 +71,6 @@ define Package/$(PKG_NAME)/install
 ifdef CONFIG_PACKAGE_XRAY_INCLUDE_CLOUDFLARE_ORIGIN_ROOT_CA
 	$(INSTALL_DATA) ./root/etc/ssl/certs/origin_ca_ecc_root.pem $(1)/etc/ssl/certs/origin_ca_ecc_root.pem
 endif
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./root/etc/uci-defaults/xray $(1)/etc/uci-defaults/xray
 	$(INSTALL_DIR) $(1)/www/luci-static/resources/view
 	$(INSTALL_DATA) ./root/www/luci-static/resources/view/xray.js $(1)/www/luci-static/resources/view/xray.js
 	$(INSTALL_DIR) $(1)/usr/share/luci/menu.d
@@ -95,22 +93,21 @@ ifdef CONFIG_PACKAGE_XRAY_RLIMIT_DATA_LARGE
 	$(INSTALL_DATA) ./root/usr/share/xray/rlimit_data_large $(1)/usr/share/xray/rlimit_data
 endif
 ifdef CONFIG_PACKAGE_firewall
-	$(INSTALL_BIN) ./root/usr/share/xray/gen_ipset_rules.lua $(1)/usr/share/xray/gen_ipset_rules.lua
-	$(INSTALL_BIN) ./root/usr/share/xray/gen_ipset_rules_extra_normal.lua $(1)/usr/share/xray/gen_ipset_rules_extra.lua
-	$(INSTALL_BIN) ./root/usr/share/xray/firewall_include.lua $(1)/usr/share/xray/firewall_include.lua
-	$(INSTALL_DATA) ./root/usr/share/xray/init.fw3 $(1)/usr/share/xray/init.firewall
-	$(INSTALL_BIN) ./root/usr/share/xray/gen_config.lua $(1)/usr/share/xray/gen_config.lua
+	$(INSTALL_BIN) $(CURDIR)/root/usr/share/xray/gen_ipset_rules.lua $(1)/usr/share/xray/gen_ipset_rules.lua
+	$(INSTALL_BIN) $(CURDIR)/root/usr/share/xray/gen_ipset_rules_extra_normal.lua $(1)/usr/share/xray/gen_ipset_rules_extra.lua
+	$(INSTALL_BIN) $(CURDIR)/root/usr/share/xray/firewall_include.lua $(1)/usr/share/xray/firewall_include.lua
+	$(INSTALL_BIN) $(CURDIR)/root/usr/share/xray/gen_config.lua $(1)/usr/share/xray/gen_config.lua
+	$(INSTALL_BIN) $(CURDIR)/root/lib/functions/xray.fw3.sh $(1)/lib/functions/xray.sh
 endif
+
 ifdef CONFIG_PACKAGE_firewall4
-	$(INSTALL_DATA) ./root/usr/share/xray/include.nft $(1)/usr/share/xray/include.nft
-	$(INSTALL_DIR) $(1)/etc/nftables.d
-	$(LN) /usr/share/xray/include.nft $(1)/etc/nftables.d/99-xray.nft
-	$(INSTALL_BIN) ./root/usr/share/xray/firewall_include.ut $(1)/usr/share/xray/firewall_include.ut
-	$(INSTALL_DATA) ./root/usr/share/xray/init.fw4 $(1)/usr/share/xray/init.firewall
-	$(INSTALL_BIN) ./root/usr/share/xray/gen_config.uc $(1)/usr/share/xray/gen_config.uc
+	$(INSTALL_DIR) $(1)/etc/nftables.d/
+	$(INSTALL_DATA) $(CURDIR)/root/etc/nftables.d/99-xray.nft $(1)/etc/nftables.d/99-xray.nft
+	$(INSTALL_BIN) $(CURDIR)/root/usr/share/xray/firewall_include.ut $(1)/usr/share/xray/firewall_include.ut
+	$(INSTALL_BIN) $(CURDIR)/root/usr/share/xray/gen_config.uc $(1)/usr/share/xray/gen_config.uc
+	$(INSTALL_BIN) $(CURDIR)/root/lib/functions/xray.fw4.sh $(1)/lib/functions/xray.sh
 endif
-	$(INSTALL_DIR) $(1)/usr/libexec/rpcd
-	$(INSTALL_BIN) ./root/usr/libexec/rpcd/xray $(1)/usr/libexec/rpcd/xray
+
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
