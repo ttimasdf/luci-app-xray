@@ -1,5 +1,9 @@
 FIREWALL_INCLUDE="/usr/share/xray/firewall_include.lua"
 
+log() {
+    logger -st xapp[$$] -p4 "$@"
+}
+
 setup_firewall() {
     log "Setting ipset rules..."
     lua /usr/share/xray/gen_ipset_rules.lua | ipset -! restore
