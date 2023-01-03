@@ -27,5 +27,5 @@ flush_firewall() {
 }
 
 impl_gen_config_file() {
-    /usr/bin/ucode /usr/share/xray/gen_config.uc > /var/etc/xray/config.json
+    /usr/bin/ucode /usr/share/xray/gen_config.uc > /var/etc/xray/10-config.json
 }

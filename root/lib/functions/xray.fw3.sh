@@ -29,5 +29,5 @@ flush_firewall() {
 }
 
 impl_gen_config_file() {
-    /usr/bin/lua /usr/share/xray/gen_config.lua > /var/etc/xray/config.json
+    /usr/bin/lua /usr/share/xray/gen_config.lua > /var/etc/xray/10-config.json
 }
