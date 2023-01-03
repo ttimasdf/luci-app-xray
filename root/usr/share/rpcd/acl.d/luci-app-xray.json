@@ -4,7 +4,10 @@
         "read": {
             "uci": [
                 "xapp"
-            ]
+            ],
+            "file": {
+                "/var/run/xray.pid": [ "read" ]
+            }
         },
         "write": {
             "uci": [

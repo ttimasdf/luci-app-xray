@@ -119,14 +119,10 @@ function check_resource_files(load_result) {
     let geosite_size = 0;
     let firewall4 = false;
     let xray_bin_default = false;
-    let xray_running = false;
     let optional_features = {};
     for (const f of load_result) {
         if (f.name == "xray") {
             xray_bin_default = true;
-        }
-        if (f.name == "xray.pid") {
-            xray_running = true;
         }
         if (f.name == "geoip.dat") {
             geoip_existence = true;
@@ -151,7 +147,6 @@ function check_resource_files(load_result) {
         optional_features: optional_features,
         firewall4: firewall4,
         xray_bin_default: xray_bin_default,
-        xray_running: xray_running,
     }
 }
 
@@ -160,15 +155,19 @@ return view.extend({
         return Promise.all([
             uci.load("xapp"),
             fs.list("/usr/share/xray"),
-            network.getHostHints()
+            network.getHostHints(),
+            L.resolveDefault(fs.read("/var/run/xray.pid"), null),
         ])
     },
 
     render: function (load_result) {
         const config_data = load_result[0];
+        const xray_dir = load_result[1];
+        const network_hosts = load_result[2];
+        const xray_pid = load_result[3];
         const geoip_direct_code = uci.get_first(config_data, "general", "geoip_direct_code");
-        const { geoip_existence, geoip_size, geosite_existence, geosite_size, optional_features, firewall4, xray_bin_default, xray_running } = check_resource_files(load_result[1]);
-        const status_text = xray_running ? _("[Xray is running]") : _("[Xray is stopped]");
+        const { geoip_existence, geoip_size, geosite_existence, geosite_size, optional_features, firewall4, xray_bin_default } = check_resource_files(xray_dir);
+        const status_text = xray_pid ? (_("[Xray is running]") + `[PID:${xray_pid.trim()}]`) : _("[Xray is stopped]");
 
         let asset_file_status = _('WARNING: at least one of asset files (geoip.dat, geosite.dat) is not found under /usr/share/xray. Xray may not work properly. See <a href="https://github.com/ttimasdf/luci-app-xray">here</a> for help.')
         if (geoip_existence) {
@@ -528,8 +527,8 @@ return view.extend({
         ss.addremove = true
 
         o = ss.option(form.Value, "macaddr", _("MAC Address"))
-        L.sortedKeys(load_result[2].hosts).forEach(function (mac) {
-            o.value(mac, E([], [mac, ' (', E('strong', [load_result[2].hosts[mac].name || L.toArray(load_result[2].hosts[mac].ipaddrs || load_result[2].hosts[mac].ipv4)[0] || L.toArray(load_result[2].hosts[mac].ip6addrs || load_result[2].hosts[mac].ipv6)[0] || '?']), ')']));
+        L.sortedKeys(network_hosts.hosts).forEach(function (mac) {
+            o.value(mac, E([], [mac, ' (', E('strong', [network_hosts.hosts[mac].name || L.toArray(network_hosts.hosts[mac].ipaddrs || network_hosts.hosts[mac].ipv4)[0] || L.toArray(network_hosts.hosts[mac].ip6addrs || network_hosts.hosts[mac].ipv6)[0] || '?']), ')']));
         });
 
         o.datatype = "macaddr"
