@@ -55,6 +55,8 @@ gen_config_file() {
     impl_gen_config_file
     local custom_config=$(uci_get_by_type general custom_config)
     [ ! "${#custom_config}" == "0" ] && echo ${custom_config} > /var/etc/xray/11-xapp-custom.json
+    local custom_config_dir=$(uci_get_by_type general custom_config_dir)
+    [ -n "$custom_config_dir" -a -n "$(ls -A $custom_config_dir)" ] && cp "$custom_config_dir"/* /var/etc/xray/
 }
 
 setup_dnsmasq() {

@@ -32,6 +32,7 @@ config general
 	option buffer_size '512'
 	option rlimit_nofile ''
 	option rlimit_data ''
+	option custom_config_dir ''
 
 config servers
 	option security 'auto'

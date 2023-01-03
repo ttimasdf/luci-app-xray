@@ -836,6 +836,10 @@ return view.extend({
         o.monospace = true
         o.rows = 10
 
+        o = s.taboption('custom_options', form.Value, 'custom_config_dir', _('Custom Configuration Dir'), _("Directory containing more custom configurations."))
+        o.datatype = 'directory'
+        o.placeholder = '/etc/xray/includes'
+
         return m.render();
     }
 });
