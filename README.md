@@ -2,7 +2,9 @@
 
 # luci-app-xray
 
-Yet Another LuCI frontend for Xray. An *opinionated* forked version of [yichya/luci-app-xray](https://github.com/yichya/luci-app-xray).
+Yet Another LuCI frontend for Xray. An *opinionated* forked version of [yichya/luci-app-xray](https://github.com/yichya/luci-app-xray) with lots of quality of life improvements.
+
+This project will *never* provide updates through an opkg feed. It's easy though, but adding a custom feed from untrusted source (anywhere, even me!) is a huge security flaw. Manual installation with `opkg` or pack the ipk into the firmware image with OpenWrt imagebuilder is recommanded.
 
 | OpenWrt Version |     compatible?     |
 | :---------------: | :--------------------: |
