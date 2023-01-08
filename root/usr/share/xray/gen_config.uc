@@ -947,6 +947,12 @@ function rules() {
         });
     }
     if (proxy["tproxy_sniffing"] == "1") {
+        splice(result, 0, 0, {
+            type: "field",
+            inboundTag: ["tproxy_tcp_inbound", "tproxy_udp_inbound", "dns_conf_inbound", "https_inbound", "http_inbound"],
+            outboundTag: "direct",
+            domain: fast_domain_rules()
+        });
         if (secure_domain_rules() != null) {
             splice(result, 0, 0, {
                 type: "field",
@@ -969,12 +975,6 @@ function rules() {
                 domain: blocked_domain_rules(),
             });
         }
-        splice(result, 0, 0, {
-            type: "field",
-            inboundTag: ["tproxy_tcp_inbound", "tproxy_udp_inbound", "dns_conf_inbound", "https_inbound", "http_inbound"],
-            outboundTag: "direct",
-            domain: fast_domain_rules()
-        });
     }
     splice(result, 0, 0, ...manual_tproxy_rules());
     splice(result, 0, 0, ...bridge_rules());
