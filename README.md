@@ -24,3 +24,14 @@ This project will *never* provide updates through an opkg feed. It's easy though
 - Configuration option to bypass proxy for network traffic from intranet hosts by host MAC address.
 - Configuration option to bypass proxy for network traffic from router processes by UID and GID.
 - Optional dnsmasq takeover, which automatically setting xray DNS inbound as dnsmasq upstream.
+
+## Breaking changes differ from upstream project
+
+Service name is changed from `xray` to `xapp`, to avoid conflict with service provided by openwrt package `xray-core`.
+
+```bash
+# start service
+/etc/init.d/xapp start
+# stop service
+/etc/init.d/xapp stop
+```
