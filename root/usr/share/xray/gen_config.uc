@@ -475,7 +475,7 @@ function fallbacks() {
                 name: s["name"],
                 xver: s["xver"],
                 path: s["path"]
-            })
+            });
         }
     }
     push(f, {
@@ -633,7 +633,7 @@ function domain_rules(k) {
             return geosite_existence;
         }
         return true;
-    })
+    });
 }
 
 function secure_domain_rules() {
@@ -736,7 +736,7 @@ function inbounds() {
                 address: "127.0.0.1"
             },
             tag: "metrics"
-        })
+        });
     }
     if (proxy["xray_api"] == '1') {
         push(i, {
@@ -747,7 +747,7 @@ function inbounds() {
                 address: "127.0.0.1"
             },
             tag: "api"
-        })
+        });
     }
     return i
 }
@@ -844,7 +844,7 @@ function bridges() {
         push(result, {
             tag: sprintf("bridge_inbound_%d", i),
             domain: v["domain"]
-        })
+        });
     }
     return result
 }
@@ -865,7 +865,7 @@ function bridge_outbounds() {
             settings: {
                 redirect: v["redirect"]
             }
-        })
+        });
     }
     return result
 }
@@ -918,7 +918,7 @@ function rules() {
             type: "field",
             inboundTag: ["metrics"],
             outboundTag: "metrics"
-        })
+        });
     }
     if (geoip_existence) {
         if (proxy["geoip_direct_code"] == null || proxy["geoip_direct_code"] == "upgrade") {
@@ -929,7 +929,7 @@ function rules() {
                     inboundTag: ["tproxy_tcp_inbound", "tproxy_udp_inbound", "dns_conf_inbound"],
                     outboundTag: "direct",
                     ip: geoip_direct_code_list
-                })
+                });
             }
         } else {
             splice(result, 0, 0, {
@@ -937,14 +937,14 @@ function rules() {
                 inboundTag: ["tproxy_tcp_inbound", "tproxy_udp_inbound", "dns_conf_inbound"],
                 outboundTag: "direct",
                 ip: ["geoip:" + proxy["geoip_direct_code"]]
-            })
+            });
         }
         splice(result, 0, 0, {
             type: "field",
             inboundTag: ["tproxy_tcp_inbound", "tproxy_udp_inbound", "dns_conf_inbound", "socks_inbound", "https_inbound", "http_inbound"],
             outboundTag: "direct",
             ip: ["geoip:private"]
-        })
+        });
     }
     if (proxy["tproxy_sniffing"] == "1") {
         if (secure_domain_rules() != null) {
@@ -967,14 +967,14 @@ function rules() {
                 inboundTag: ["tproxy_tcp_inbound", "tproxy_udp_inbound", "dns_conf_inbound"],
                 outboundTag: "blackhole_outbound",
                 domain: blocked_domain_rules(),
-            })
+            });
         }
         splice(result, 0, 0, {
             type: "field",
             inboundTag: ["tproxy_tcp_inbound", "tproxy_udp_inbound", "dns_conf_inbound", "https_inbound", "http_inbound"],
             outboundTag: "direct",
             domain: fast_domain_rules()
-        })
+        });
     }
     splice(result, 0, 0, ...manual_tproxy_rules());
     splice(result, 0, 0, ...bridge_rules());
