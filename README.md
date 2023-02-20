@@ -14,16 +14,19 @@ This project will *never* provide updates through an opkg feed. It's easy though
 
 # Features
 
-- Proxy server management.
+🌟: only in this fork, *NOT* available upstream.
+
+- Proxy servers management.
 - Separate upstream proxies for TCP and UDP.
-- Transparent proxy through nftables (>=22.03) or iptables (<=21.02)
+- Transparent proxy through nftables (>=22.03) or iptables (<=21.02) (🌟completely rewritten)
 - Proxy rules config by whitelist/blacklist.
-- Xray [confdir support](https://xtls.github.io/config/features/multiple.html), allowing maximum flexibility.
-- Using Xray as a HTTPS reverse proxy.
-- ulimit configuration (file descriptors, memory usage) for Xray process.
+- 🌟Xray [confdir support](https://xtls.github.io/config/features/multiple.html), allowing maximum flexibility.
+- 🌟Explicitly naming auto-generated configuration files for better sorting, improving the integration with *confdir*.
+- Using Xray as an HTTPS reverse proxy.
+- 🌟ulimit configuration (file descriptors, memory usage) for Xray process.
 - Configuration option to bypass proxy for network traffic from intranet hosts by host MAC address.
 - Configuration option to bypass proxy for network traffic from router processes by UID and GID.
-- Optional dnsmasq takeover, which automatically setting xray DNS inbound as dnsmasq upstream.
+- 🌟Optional dnsmasq takeover, which automatically setting xray DNS inbound as dnsmasq upstream.
 
 ## Breaking changes differ from upstream project
 
