@@ -6,6 +6,7 @@
                 "xapp"
             ],
             "file": {
+                "/etc/init.d/xapp": [ "exec" ],
                 "/var/run/xray.pid": [ "read" ]
             }
         },

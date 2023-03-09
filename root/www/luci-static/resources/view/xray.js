@@ -3,6 +3,7 @@
 'require uci';
 'require form';
 'require fs';
+'require ui';
 'require network';
 'require tools.widgets as widgets';
 
@@ -151,6 +152,33 @@ function check_resource_files(load_result) {
 }
 
 return view.extend({
+    handleServiceReload: function (m, ev) {
+        return fs
+            .exec("/etc/init.d/xapp", ["reload"])
+            .then(L.bind(
+                function (btn, res) {
+                    if (res.code === 0) {
+                        ui.addNotification(null, [
+                            E("p", _("Reload service success"))
+                        ], "success");
+                    } else {
+                        ui.addNotification(null, [
+                            E("p", _("Reload service failed with code %d").format(res.code)),
+                            res.stderr ? E("pre", {}, [res.stderr]) : "",
+                        ], "error");
+                        L.raise("Error", "Reload failed");
+                    }
+                },
+                this,
+                ev.target
+            ))
+            .then(L.bind(m.load, m))
+            .then(L.bind(m.render, m))
+            .catch(function (e) {
+                ui.addNotification(null, E("p", e.message));
+            });
+    },
+
     load: function () {
         return Promise.all([
             uci.load("xapp"),
@@ -191,6 +219,11 @@ return view.extend({
         if (xray_bin_default) {
             o.value("/usr/bin/xray", _("/usr/bin/xray (default, exist)"))
         }
+
+        o = s.taboption('general', form.Button, "_reload", _("Reload Service"), _("Please restart service manually if configuration changes."))
+        o.inputstyle = "action reload"
+        o.inputtitle = _("Reload")
+        o.onclick = L.bind(this.handleServiceReload, this, m);
 
         o = s.taboption('general', form.ListValue, 'main_server', _('TCP Server'))
         o.datatype = "uciname"
