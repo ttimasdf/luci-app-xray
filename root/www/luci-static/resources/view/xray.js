@@ -152,31 +152,16 @@ function check_resource_files(load_result) {
 }
 
 return view.extend({
-    handleServiceReload: function (m, ev) {
-        return fs
-            .exec("/etc/init.d/xapp", ["reload"])
-            .then(L.bind(
-                function (btn, res) {
-                    if (res.code === 0) {
-                        ui.addNotification(null, [
-                            E("p", _("Reload service success"))
-                        ], "success");
-                    } else {
-                        ui.addNotification(null, [
-                            E("p", _("Reload service failed with code %d").format(res.code)),
-                            res.stderr ? E("pre", {}, [res.stderr]) : "",
-                        ], "error");
-                        L.raise("Error", "Reload failed");
-                    }
-                },
-                this,
-                ev.target
-            ))
-            .then(L.bind(m.load, m))
-            .then(L.bind(m.render, m))
-            .catch(function (e) {
-                ui.addNotification(null, E("p", e.message));
-            });
+    handleServiceReload: function (ev) {
+        return fs.exec("/etc/init.d/xapp", ["restart"]).then(function(rc) {
+            ui.addNotification(null, E('p', _('Reload service success.')), 'info');
+        }).catch(function (e) {
+            ui.addNotification(null, E("p", _('Unable to reload service: %s').format(e.message)), "error");
+        });
+    },
+
+    handleSaveApply: function (ev, mode) {
+        return this.__base__.handleSaveApply(ev, mode).then(this.handleServiceReload);
     },
 
     load: function () {
@@ -220,10 +205,10 @@ return view.extend({
             o.value("/usr/bin/xray", _("/usr/bin/xray (default, exist)"))
         }
 
-        o = s.taboption('general', form.Button, "_reload", _("Reload Service"), _("Please restart service manually if configuration changes."))
+        o = s.taboption('general', form.Button, "_reload", _("Reload Service"), _("Restart xray process manually."))
         o.inputstyle = "action reload"
         o.inputtitle = _("Reload")
-        o.onclick = L.bind(this.handleServiceReload, this, m);
+        o.onclick = L.bind(this.handleServiceReload, this);
 
         o = s.taboption('general', form.ListValue, 'main_server', _('TCP Server'))
         o.datatype = "uciname"
