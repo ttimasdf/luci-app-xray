@@ -20,7 +20,7 @@ flush_firewall() {
     ip route flush table 100
 
     log "Flushing firewall4 rules..."
-    rm /var/etc/xray/firewall_include.nft
+    rm /var/etc/xray/firewall_include.nft 2>/dev/null || log ".. but fw4 rule file not exists"
 
     log "Triggering firewall4 restart..."
     /etc/init.d/firewall restart > /dev/null 2>&1
