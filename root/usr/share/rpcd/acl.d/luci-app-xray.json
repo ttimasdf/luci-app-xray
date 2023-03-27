@@ -2,6 +2,12 @@
     "luci-app-xray": {
         "description": "Grant access to xray configurations",
         "read": {
+            "ubus": {
+                "luci": [
+                    "getInitList",
+                    "setInitAction"
+                ]
+            },
             "uci": [
                 "xapp"
             ],
