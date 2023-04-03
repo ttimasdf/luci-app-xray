@@ -204,16 +204,31 @@ function xtls_settings(server, protocol) {
     return result;
 }
 
+function reality_settings(server, protocol) {
+    let result = {
+        fingerprint: server[protocol + "_tls_fingerprint"],
+        serverName: server[protocol + "_reality_servername"],
+        publicKey: server[protocol + "_reality_publickey"],
+        shortId: server[protocol + "_reality_shortid"],
+        spiderX: server[protocol + "_reality_spiderx"],
+    };
+
+    return result;
+}
+
 function stream_settings(server, protocol, xtls, tag) {
     const security = server[protocol + "_tls"];
     let tlsSettings = null;
     let xtlsSettings = null;
+    let realitySettings = null;
     if (security == "tls") {
         tlsSettings = tls_settings(server, protocol);
     } else if (security == "xtls") {
         if (xtls) {
             xtlsSettings = xtls_settings(server, protocol);
         }
+    } else if (security == "reality") {
+        realitySettings = reality_settings(server, protocol);
     }
 
     let dialer_proxy = null;
@@ -233,6 +248,7 @@ function stream_settings(server, protocol, xtls, tag) {
             security: security,
             tlsSettings: tlsSettings,
             xtlsSettings: xtlsSettings,
+            realitySettings: realitySettings,
             quicSettings: stream_quic(server),
             tcpSettings: stream_tcp(server),
             kcpSettings: stream_kcp(server),
@@ -302,7 +318,7 @@ function vless_outbound(server, tag) {
     let flow = null;
     if (server["vless_tls"] == "xtls") {
         flow = server["vless_flow"]
-    } else if (server["vless_tls"] == "tls") {
+    } else if (server["vless_tls"] == "tls" || server["vless_tls"] == "reality") {
         flow = server["vless_flow_tls"]
     }
     if (flow == "none") {
