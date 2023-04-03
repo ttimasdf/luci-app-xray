@@ -234,14 +234,29 @@ local function xtls_settings(server, protocol)
     return result
 end
 
+local function reality_settings(server, protocol)
+    local result = {
+        fingerprint = server[protocol .. "_tls_fingerprint"],
+        serverName = server[protocol .. "_reality_servername"],
+        publicKey = server[protocol .. "_reality_publickey"],
+        shortId = server[protocol .. "_reality_shortid"],
+        spiderX = server[protocol .. "_reality_spiderx"],
+    }
+
+    return result
+end
+
 local function stream_settings(server, protocol, xtls, tag)
     local security = server[protocol .. "_tls"]
     local tlsSettings = nil
     local xtlsSettings = nil
+    local realitySettings = nil
     if security == "tls" then
         tlsSettings = tls_settings(server, protocol)
     elseif security == "xtls" and xtls then
         xtlsSettings = xtls_settings(server, protocol)
+    elseif security == "reality" then
+        realitySettings = reality_settings(server, protocol)
     end
     local dialerProxySection = nil
     local dialerProxy = nil
@@ -259,6 +274,7 @@ local function stream_settings(server, protocol, xtls, tag)
         security = security,
         tlsSettings = tlsSettings,
         xtlsSettings = xtlsSettings,
+        realitySettings = realitySettings,
         quicSettings = stream_quic(server),
         tcpSettings = stream_tcp(server),
         kcpSettings = stream_kcp(server),
@@ -316,7 +332,7 @@ local function vless_outbound(server, tag)
     local flow = nil
     if server.vless_tls == "xtls" then
         flow = server.vless_flow
-    elseif server.vless_tls == "tls" then
+    elseif server.vless_tls == "tls" or server.vless_tls == "reality" then
         flow = server.vless_flow_tls
     end
     if flow == "none" then
@@ -802,7 +818,7 @@ local function manual_tproxy_outbounds()
                     local force_forward_server_udp = ucursor:get_all("xray", v.force_forward_server_udp)
                     for _, f in ipairs(server_outbound(force_forward_server_udp, udp_tag)) do
                         table.insert(result, f)
-                    end                
+                    end
                 end
             else
                 udp_tag = "udp_outbound"
