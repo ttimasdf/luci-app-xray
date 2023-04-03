@@ -87,4 +87,27 @@ endif
 
 endef
 
+define Package/$(PKG_NAME)/postinst
+#!/bin/sh
+
+enable_feature_flag() {
+	flag="$$1"
+	file="$$2"
+	sed -i -e "/%FLAG_NO_$${flag}%/d" -e "s@// *%FLAG_$${flag}% *@@" "$$file"
+	echo "Feature [$${flag}] enabled"
+}
+
+if [ -z "$${PKG_INSTROOT}" ]; then
+	sed -i -e '/%FLAG_DELETE%/d' /www/luci-static/resources/view/xray.js
+	if [ -f "/usr/share/xray/gen_config.lua" ]; then
+		enable_feature_flag FW3 /www/luci-static/resources/view/xray.js
+	fi
+	if [ -f "/usr/share/xray/gen_config.uc" ]; then
+		enable_feature_flag FW4 /www/luci-static/resources/view/xray.js
+	fi
+fi
+
+exit 0
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))

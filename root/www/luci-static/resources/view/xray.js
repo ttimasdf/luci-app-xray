@@ -10,6 +10,13 @@
 
 var callInitList, callInitAction, ServiceController;
 
+const FEATURE_FLAGS = {
+    have_fw3: false,  // %FLAG_NO_FW3% managed by build system
+    have_fw4: false,  // %FLAG_NO_FW4% managed by build system
+    // %FLAG_FW3% have_fw3: true,  // uncomment by build system on fw3
+    // %FLAG_FW4% have_fw4: true,  // uncomment by build system on fw4
+};
+
 callInitList = rpc.declare({
     object: 'luci',
     method: 'getInitList',
