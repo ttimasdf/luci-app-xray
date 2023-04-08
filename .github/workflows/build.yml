@@ -26,7 +26,7 @@ jobs:
     needs: create_release
     strategy:
       matrix:
-        arch: [arm_cortex-a15_neon-vfpv4]  # x86-64,
+        arch: [x86-64]  # x86-64,
         version: [22.03.2, 21.02.5]
 
     steps:
