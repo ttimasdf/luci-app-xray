@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         arch: [x86-64]  # x86-64,
-        version: [22.03.2, 21.02.5]
+        version: [22.03.3]
 
     steps:
       - uses: actions/checkout@v2
