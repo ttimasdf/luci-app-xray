@@ -25,10 +25,10 @@ callInitList = rpc.declare({
 }),
 
 callInitAction = rpc.declare({
-	object: 'luci',
-	method: 'setInitAction',
-	params: [ 'name', 'action' ],
-	expect: { result: false }
+    object: 'luci',
+    method: 'setInitAction',
+    params: [ 'name', 'action' ],
+    expect: { result: false }
 });
 
 
@@ -115,11 +115,11 @@ function add_flow_and_stream_security_conf(s, tab_name, depends_field_name, prot
             o.value("360", "360")
             o.value("qq", "qq")
         } else {
-        o.value("", "(not set)")
-        o.value("chrome", "chrome")
-        o.value("firefox", "firefox")
-        o.value("safari", "safari")
-        o.value("randomized", "randomized")
+            o.value("", "(not set)")
+            o.value("chrome", "chrome")
+            o.value("firefox", "firefox")
+            o.value("safari", "safari")
+            o.value("randomized", "randomized")
         }
         o.rmempty = true
         o.modalonly = true
@@ -215,6 +215,22 @@ function check_resource_files(load_result) {
         firewall4: firewall4,
         xray_bin_default: xray_bin_default,
     }
+}
+
+function check_dns_format(_, dns) {
+    if (/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$/.test(dns)) {
+        // IPv4 Address
+        return true;
+    }
+    if (/(https|tcp|quic)(\+local)?:\/\/([-\w\d@:%._\+~#=]{1,256}\.[\w\d()]{1,6}\b)(:(\d+))?([-\w\d()@:%_\+.~#?&\/=]*)/.test(dns)) {
+        // DoH/TCP/QUIC Server Address
+        return true;
+    }
+
+    if (dns === "localhost") {
+        return true;
+    }
+    return "Invalid DNS address";
 }
 
 ServiceController = form.DummyValue.extend({
@@ -655,7 +671,7 @@ return view.extend({
         s.tab('dns', _('DNS Settings'));
 
         o = s.taboption('dns', form.Value, 'fast_dns', _('Fast DNS'), _("DNS for resolving outbound domains and following bypassed domains"))
-        o.datatype = 'or(ip4addr, ip4addrport)'
+        o.validate = check_dns_format
         o.placeholder = "114.114.114.114"
 
         if (geosite_existence) {
@@ -666,7 +682,7 @@ return view.extend({
         o.rmempty = true
 
         o = s.taboption('dns', form.Value, 'secure_dns', _('Secure DNS'), _("DNS for resolving known polluted domains (specify forwarded domain rules here)"))
-        o.datatype = 'or(ip4addr, ip4addrport)'
+        o.validate = check_dns_format
         o.placeholder = "1.1.1.1"
 
         if (geosite_existence) {
@@ -677,7 +693,7 @@ return view.extend({
         o.rmempty = true
 
         o = s.taboption('dns', form.Value, 'default_dns', _('Default DNS'), _("DNS for resolving other sites (not in the rules above) and DNS records other than A or AAAA (TXT and MX for example)"))
-        o.datatype = 'or(ip4addr, ip4addrport)'
+        o.validate = check_dns_format
         o.placeholder = "8.8.8.8"
 
         if (geosite_existence) {

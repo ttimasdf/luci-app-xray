@@ -1,6 +1,8 @@
 #!/usr/bin/ucode
 const uci = require("uci");
 const fs = require("fs");
+const resolv = require("resolv");
+
 const cursor = uci.cursor();
 cursor.load("xapp");
 const config = cursor.get_all("xapp");
@@ -13,18 +15,44 @@ const udp_server = config[proxy["tproxy_udp_server"]];
 const geoip_existence = index(share_dir, "geoip.dat") > 0;
 const geosite_existence = index(share_dir, "geosite.dat") > 0;
 
-function split_ipv4_host_port(val, port_default) {
-    const result = match(val, /([0-9\.]+):([0-9]+)/);
-    if (result == null) {
-        return {
-            address: val,
-            port: int(port_default)
-        }
+function dns_resolve(domain) {
+    try {
+        let ret = resolv.query(domain);
+        ip = filter(values(ret), r => r["A"] != null)[0]["A"];
+    } catch (e) {
+        ip = [domain];
     }
+    return ip;
+}
 
+function parse_dns_server_string(val, should_resolve) {
+    const matches = match(val, /((https|tcp|quic)(\+local)?:\/\/)?([-0-9a-zA-Z@:%._\+~#=]+\.[0-9a-zA-Z()]+\b)(:([0-9]+))?([-0-9a-zA-Z()@:%_\+.~#?&\/=]*)/);
+    let addresses = [],
+        urls = [],
+        server_type = matches[2] || "udp",
+        is_local = matches[3] != null,
+        domain = matches[4],
+        port = matches[6] || {https: 443, udp: 53, tcp: 53, quic: 784}[server_type];
+    if (match(domain, /^\d+\.\d+\.\d+\.\d+$/) == null && should_resolve) {
+        // DoH URL contains a domain name
+        addresses = dns_resolve(domain);
+    } else {
+        addresses = [domain];
+    }
+    if (server_type == "udp") {
+        urls = addresses;
+    } else if (should_resolve) {
+        urls = map(addresses, o => `${matches[1]||""}${o}${matches[5]||""}${matches[7]||""}`);
+    } else {
+        urls = [val];
+    }
     return {
-        address: result[1],
-        port: int(result[2])
+        type: server_type,
+        domain: domain,
+        urls: urls,
+        addresses: addresses,
+        port: port,
+        local: is_local,
     }
 }
 
@@ -588,7 +616,7 @@ function https_inbound() {
 }
 
 function dns_server_inbounds() {
-    const default_dns = split_ipv4_host_port(proxy["default_dns"], 53);
+    const default_dns = parse_dns_server_string(proxy["default_dns"], false);
     let result = [];
     const dns_port = int(proxy["dns_port"]);
     const dns_count = int(proxy["dns_count"] || 0);
@@ -598,7 +626,7 @@ function dns_server_inbounds() {
             protocol: "dokodemo-door",
             tag: sprintf("dns_server_inbound_%d", i),
             settings: {
-                address: default_dns["address"],
+                address: default_dns["domain"],
                 port: default_dns["port"],
                 network: "tcp,udp"
             }
@@ -665,32 +693,42 @@ function blocked_domain_rules() {
 }
 
 function dns_conf() {
-    const fast_dns_object = split_ipv4_host_port(proxy["fast_dns"], 53);
-    const default_dns_object = split_ipv4_host_port(proxy["default_dns"], 53);
+    const fast_dns_object = parse_dns_server_string(proxy["fast_dns"], false);
+    const default_dns_object = parse_dns_server_string(proxy["default_dns"], true);
+    let default_dns_entries;
+    if (default_dns_object["type"] == "udp") {
+        default_dns_entries = map(default_dns_object["addresses"], o => ({address: o, port: default_dns_object["port"]}));
+    } else {
+        default_dns_entries = default_dns_object["urls"];
+    }
     let servers = [
         {
-            address: fast_dns_object["address"],
+            address: proxy["fast_dns"],
             port: fast_dns_object["port"],
             domains: upstream_domain_names(),
         },
-        default_dns_object,
+        ...default_dns_entries,
     ];
 
     if (fast_domain_rules() != null) {
-        splice(servers, 1, 0, {
-            address: fast_dns_object["address"],
-            port: fast_dns_object["port"],
-            domains: fast_domain_rules(),
-        });
+        splice(servers, 1, 0, ...map(
+            fast_dns_object["urls"],
+            url => ({
+                address: url,
+                port: fast_dns_object["port"],
+                domains: fast_domain_rules(),
+            })))
     }
 
     if (secure_domain_rules() != null) {
-        const secure_dns_object = split_ipv4_host_port(proxy["secure_dns"], 53);
-        splice(servers, 1, 0, {
-            address: secure_dns_object["address"],
-            port: secure_dns_object["port"],
-            domains: secure_domain_rules(),
-        });
+        const secure_dns_object = parse_dns_server_string(proxy["secure_dns"], true);
+        splice(servers, 1, 0, ...map(
+            secure_dns_object["urls"],
+            url => ({
+                address: url,
+                port: secure_dns_object["port"],
+                domains: secure_domain_rules(),
+            })))
     }
 
     let hosts = null;
@@ -705,6 +743,7 @@ function dns_conf() {
         hosts: hosts,
         servers: servers,
         tag: "dns_conf_inbound",
+        disableFallbackIfMatch: true,
         queryStrategy: "UseIPv4"
     }
 }
