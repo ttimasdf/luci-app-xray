@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         arch: [arm_cortex-a15_neon-vfpv4]  # x86-64,
-        version: [22.03.2, 21.02.5]
+        version: [22.03, 21.02]
 
     steps:
       - uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
       - name: Build ipk
         uses: ttimasdf/gh-action-openwrt-build-package@master
         env:
-          ARCH: ${{ matrix.arch }}-${{ matrix.version }}
+          ARCH: ${{ matrix.arch }}-openwrt-${{ matrix.version }}
 
       - name: Upload ipk packages
         uses: actions/upload-artifact@v2
